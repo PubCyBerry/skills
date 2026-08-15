@@ -56,6 +56,10 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          # This repo has no Python dependency files, so the cache has
+          # nothing to key on and every run would warn about it.
+          enable-cache: false
 
       - name: Install lint tools
         # Not for linting this repo — for the smoke tests below. A
