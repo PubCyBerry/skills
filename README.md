@@ -1,37 +1,133 @@
-# skills
+# Agent Skills
 
-Claude Code Agent Skills 모음.
+**Agent Skills for Claude Code, Codex and other coding agents.**
 
-## 구조
+[![Agent Skills Spec](https://img.shields.io/badge/Agent%20Skills-Specification-blue)](https://agentskills.io)
+
+## Quickstart
+
+Install skills with the default [`skills` CLI](https://github.com/vercel-labs/skills) flow:
+
+```bash
+npx skills add pubcyberry/skills
+```
+
+The CLI runs through npx and prompts you to choose a skill and install destination. You do not need to clone this repo or copy skill folders by hand.
+
+### Install for a Specific Agent
+
+Use `--agent` to target a specific AI coding agent. Initially, we'll support common client targets, expanding the list over time. For the full list of clients supported by the spec, see the [`skills` CLI Supported Agents table](https://github.com/vercel-labs/skills#supported-agents).
+
+**Claude Code**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent claude-code
+```
+
+**Codex**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent codex
+```
+
+**Antigravity**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent antigravity
+```
+
+**Cursor**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent cursor
+```
+
+**Kiro**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent kiro-cli
+```
+
+Use `--agent` more than once to install the same skill into multiple agents.
+
+```bash
+npx skills add pubcyberry/skills \
+  --skill repo-scaffold \
+  --agent claude-code \
+  --agent codex \
+  --agent antigravity \
+  --agent cursor \
+  --agent kiro-cli
+```
+
+### Keep Skills Up to Date
+
+New skills land continuously, and existing ones are revised, renamed, or consolidated as the catalog evolves. Refresh what you have installed with:
+
+```bash
+npx skills update
+```
+
+### Browse the Catalog
+
+Use this when you want to see the skills available in this repository before installing anything.
+
+```bash
+npx skills add pubcyberry/skills --list
+```
+
+For non-interactive installs, global installs, agent-specific installs, updates, removals, and fallback manual copying, see [Advanced installation](docs/advanced-install.md).
+
+---
+
+## Skill Catalog
+
+<!-- skills-table-start -->
+| Skill | Description | Language |
+|-------|-------------|----------|
+| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Scaffolds a repository so agents navigate it by reading its docs instead of guessing. Generates the `AGENTS.md` document index, the `docs/` hierarchy (`standards` / `guides` / `references` / `generated`) with a front matter convention, and pre-commit hooks that keep it from rotting (doc convention, `.env` key sync, credential scan). Also drops in `.gitattributes`, `.editorconfig`, `.gitignore`, `.env.example`, and `SECURITY.md`. | Korean |
+<!-- skills-table-end -->
+
+The table between the `skills-table` markers is the source of truth for the catalog. Update it in the same commit that adds or renames a skill.
+
+## Repository Structure
 
 ```
 .
 ├── README.md
+├── docs/
+│   └── advanced-install.md     # non-interactive, global, and manual installs
 └── skills/
-    └── repo-scaffold/     # 저장소를 에이전트 친화적으로 스캐폴딩
+    └── repo-scaffold/
+        ├── SKILL.md            # entry point — frontmatter + instructions
+        ├── assets/             # files the skill copies into a target repo
+        ├── references/         # detail docs loaded on demand
+        └── tests/              # smoke test for the skill
 ```
 
-각 스킬은 `skills/<name>/SKILL.md` 를 진입점으로 갖는다. `SKILL.md` 의 front matter `name`, `description` 이 스킬 트리거 조건을 정의한다.
+Every skill is a self-contained directory under `skills/`, entered through its `SKILL.md`. The `name` and `description` in that file's frontmatter are what an agent matches against to decide whether to activate the skill, so `description` carries the trigger phrases — and, just as importantly, the cases where the skill should *not* fire.
 
-## 스킬 목록
+Anything beyond `SKILL.md` is loaded only after activation. Keep `SKILL.md` short and push detail into `references/`; that is what the progressive disclosure model below buys you.
 
-| 스킬 | 설명 |
-| --- | --- |
-| [repo-scaffold](skills/repo-scaffold/SKILL.md) | AGENTS.md 문서 인덱스 자동 생성, `docs/` 계층과 front matter 규약, pre-commit 검증 훅(문서 규약 / `.env` 키 동기화 / 자격 증명 스캔), `.gitattributes`, `.editorconfig`, `.gitignore`, `.env.example`, `SECURITY.md` 를 세팅한다. |
+## Standards & Compatibility
 
-## 설치
+This repository adheres to the [Agent Skills specification](https://agentskills.io/specification):
 
-Claude Code 가 스킬을 인식하려면 `~/.claude/skills/` 아래에 두어야 한다.
+- Skills are portable directories with a `SKILL.md` file at their root.
+- Metadata uses YAML frontmatter with required `name` and `description` fields.
+- Skills follow a progressive disclosure model — lightweight metadata loads at startup, full instructions load on activation.
+- Validate your skill using the [`skills-ref`](https://github.com/agentskills/agentskills/tree/main/skills-ref) reference library.
 
-```bash
-git clone https://github.com/PubCyBerry/skills.git
-ln -s "$(pwd)/skills/skills/repo-scaffold" ~/.claude/skills/repo-scaffold
-```
+## Adding a Skill
 
-프로젝트 단위로만 쓰려면 `~/.claude/skills` 대신 해당 저장소의 `.claude/skills/` 에 연결한다.
+1. Create `skills/<name>/SKILL.md`. Use the directory name as `name` — kebab-case, matching the folder exactly.
+2. Write the `description` as *when to use this / when not to use this*. Trigger accuracy comes from that pairing; a description that only states what the skill does will misfire.
+3. Put anything long — reference tables, worked examples, per-scenario detail — under `references/` and link to it from `SKILL.md`.
+4. Add a smoke test under `tests/` if the skill ships scripts.
+5. Add one row to the Skill Catalog table above.
 
-## 스킬 추가
+Before opening a PR, validate the skill with `skills-ref` and confirm the agent activates it from a realistic prompt, not just from the skill name.
 
-1. `skills/<name>/SKILL.md` 를 만든다.
-2. front matter 에 `name`, `description` 을 채운다. `description` 은 "언제 쓰는지 / 언제 쓰지 않는지" 를 함께 적어야 트리거 정확도가 오른다.
-3. 위 스킬 목록 표에 한 줄 추가한다.
+## License
+
+MIT. See [LICENSE](LICENSE).
