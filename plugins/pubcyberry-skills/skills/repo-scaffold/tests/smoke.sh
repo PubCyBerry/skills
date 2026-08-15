@@ -7,7 +7,8 @@ if [ "${REPO_SCAFFOLD_SED_WRAPPER:-0}" -eq 1 ]; then
         case "$arg" in
             */assets/scripts/gen-doc-index.sh)
                 : > "$RACE_READY"
-                while [ ! -e "$RACE_GO" ]; do sleep 0.01; done ;;
+                while [ ! -e "$RACE_GO" ]; do sleep 0.01; done
+                ;;
         esac
     done
     exec "$REAL_SED" "$@"
@@ -31,7 +32,8 @@ new_repo() {
 }
 
 expect_failure() {
-    local log="$1"; shift
+    local log="$1"
+    shift
     if "$@" > "$log" 2>&1; then
         fail "실패해야 하는 명령이 성공함: $*"
     fi
@@ -74,14 +76,21 @@ fi
 # 검사 뒤 목적지가 생겨도 기존 파일을 덮어쓰지 않는다.
 new_repo publish-race
 mkdir -p "$REPO/scripts" "$TMP_ROOT/race-bin"
-ln -s "$SMOKE" "$TMP_ROOT/race-bin/sed"
+# 이 파일 자신을 sed 래퍼로 쓴다. 심링크가 아니라 복사본에 실행 권한을 직접 준다.
+# 심링크는 Windows 에서 만들어지지 않고, 리눅스에서는 원본의 커밋된 실행 권한에
+# 의존해서 두 환경의 결과가 갈린다.
+cp "$SMOKE" "$TMP_ROOT/race-bin/sed"
+chmod +x "$TMP_ROOT/race-bin/sed"
 REAL_SED="$(command -v sed)" \
 RACE_READY="$TMP_ROOT/race-ready" RACE_GO="$TMP_ROOT/race-go" \
 REPO_SCAFFOLD_SED_WRAPPER=1 PATH="$TMP_ROOT/race-bin:$PATH" \
     bash "$SCAFFOLD" --target "$REPO" > "$TMP_ROOT/publish-race.log" &
 race_pid=$!
 while [ ! -e "$TMP_ROOT/race-ready" ]; do
-    kill -0 "$race_pid" 2>/dev/null || { wait "$race_pid" || true; fail "race 주입 전 종료됨"; }
+    kill -0 "$race_pid" 2> /dev/null || {
+        wait "$race_pid" || true
+        fail "race 주입 전 종료됨"
+    }
 done
 printf '%s\n' '경쟁 생성 파일 유지' > "$REPO/scripts/gen-doc-index.sh"
 : > "$TMP_ROOT/race-go"
@@ -113,7 +122,7 @@ expect_failure "$TMP_ROOT/missing-value.log" bash "$SCAFFOLD" --target "$REPO" -
 new_repo twice
 printf '%s\n' '기존 미추적 문서' > "$REPO/notes.md"
 bash "$SCAFFOLD" --target "$REPO" > "$TMP_ROOT/twice-first.log"
-if git -C "$REPO" ls-files --error-unmatch notes.md >/dev/null 2>&1; then
+if git -C "$REPO" ls-files --error-unmatch notes.md > /dev/null 2>&1; then
     fail "이번 실행에서 만들지 않은 경로를 git index에 등록함"
 fi
 git -C "$REPO" status --porcelain=v1 -uall > "$TMP_ROOT/status.before"
@@ -124,5 +133,41 @@ git -C "$REPO" diff --binary > "$TMP_ROOT/diff.after"
 cmp -s "$TMP_ROOT/status.before" "$TMP_ROOT/status.after" || fail "두 번째 실행이 상태를 변경함"
 cmp -s "$TMP_ROOT/diff.before" "$TMP_ROOT/diff.after" || fail "두 번째 실행이 파일을 변경함"
 grep -q '결과: ADD 0,' "$TMP_ROOT/twice-second.log" || fail "두 번째 실행에서 파일을 추가함"
+
+# 스캐폴딩 결과가 스스로 배포한 검증을 통과해야 한다.
+# 템플릿을 고치고 검증 스크립트를 안 고치면 여기서 잡힌다.
+run_self_check() {
+    # $1: 검증 스크립트 이름, $2...: 인자
+    local name="$1"
+    shift
+    if ! (cd "$REPO" && bash "tests/$name" "$@") > "$TMP_ROOT/self-$name.log" 2>&1; then
+        cat "$TMP_ROOT/self-$name.log"
+        fail "스캐폴딩 결과가 $name 을 통과하지 못함"
+    fi
+}
+
+new_repo self-check
+bash "$SCAFFOLD" --target "$REPO" --name SELFCHECK > "$TMP_ROOT/self-check.log"
+run_self_check check-docs.sh --no-net
+run_self_check check-shell.sh
+run_self_check check-workflows.sh
+run_self_check check-env.sh
+run_self_check check-secrets.sh
+
+# --help 은 헤더 주석만 낸다. 저장소 루트가 아닌 곳에서 상대 경로로 불러도 자기 파일을 찾아야 한다.
+# 스크립트가 REPO_ROOT 로 cd 한 뒤 상대 BASH_SOURCE 를 읽으면 여기서 걸린다.
+for script in check-docs.sh check-shell.sh check-workflows.sh check-env.sh check-secrets.sh; do
+    if ! (cd "$REPO/docs" && bash "../tests/$script" --help) > "$TMP_ROOT/help-$script.log" 2>&1; then
+        cat "$TMP_ROOT/help-$script.log"
+        fail "$script --help 가 실패함"
+    fi
+    if ! grep -q '^# 종료 코드' "$TMP_ROOT/help-$script.log"; then
+        cat "$TMP_ROOT/help-$script.log"
+        fail "$script --help 가 헤더 주석을 출력하지 못함"
+    fi
+    if grep -q 'set -uo pipefail' "$TMP_ROOT/help-$script.log"; then
+        fail "$script --help 가 헤더 주석을 넘어 코드까지 출력함"
+    fi
+done
 
 echo "PASS repo-scaffold smoke"
