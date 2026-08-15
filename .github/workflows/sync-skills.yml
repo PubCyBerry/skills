@@ -45,8 +45,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          # Credentials stay persisted here on purpose: the branch push
-          # that opens the sync PR reuses this checkout's remote auth.
+          # create-pull-request configures its own HTTPS credential from
+          # the `token` input. Leaving checkout's credential in place puts
+          # a second Authorization header on the same request, and GitHub
+          # answers 400 "Duplicate header" before the PR branch is pushed.
+          persist-credentials: false
 
       - name: Ensure yq and jq
         run: |
@@ -303,10 +306,15 @@ jobs:
             echo 'EOFBODY'
           } >> "$GITHUB_OUTPUT"
 
+      # A PR opened with GITHUB_TOKEN does not trigger other workflows, so
+      # Validate does not run on the sync branch. Re-run it against main
+      # after merging, or push the branch by hand when a sync PR needs the
+      # full gate before merge.
       - name: Open pull request
         if: steps.mirror.outputs.skip != 'true' && steps.summary.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          token: ${{ github.token }}
           commit-message: ${{ steps.summary.outputs.title }}
           branch: automated/sync-skills
           title: ${{ steps.summary.outputs.title }}
