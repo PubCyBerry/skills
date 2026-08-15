@@ -17,6 +17,13 @@ trim_trailing_whitespace = false
 [*.{yml,yaml,json}]
 indent_size = 2
 
+[*.{sh,bash}]
+# shfmt 가 여기서 형식 기준을 읽는다. 명령줄에 형식 플래그를 하나라도 주면
+# shfmt 가 이 파일을 통째로 무시하므로, 훅과 CI 모두 플래그 없이 부른다.
+switch_case_indent = true
+binary_next_line = true
+space_redirects = true
+
 [*.{bat,cmd,ps1}]
 end_of_line = crlf
 

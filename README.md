@@ -107,7 +107,7 @@ For non-interactive installs, global installs, agent-specific installs, updates,
 <!-- skills-table-start -->
 | Skill | Group | Kind | Lang | Summary |
 |-------|-------|------|------|---------|
-| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Repository Tooling | workflow | ko | 에이전트가 문서로 저장소를 탐색하게 만드는 구조를 세우고 pre-commit 훅으로 고정한다. |
+| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Repository Tooling | workflow | ko | 에이전트가 문서로 저장소를 탐색하게 만드는 구조를 세우고 커밋 훅으로 고정한다. |
 <!-- skills-table-end -->
 
 The table between the `skills-table` markers is **generated** from each skill's `SKILL.md` frontmatter by `.github/scripts/gen-catalog.sh`. Do not edit it by hand — CI fails the PR when it drifts from the skills it describes.
