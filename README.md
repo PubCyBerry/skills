@@ -14,6 +14,8 @@ npx skills add pubcyberry/skills
 
 The CLI runs through npx and prompts you to choose a skill and install destination. You do not need to clone this repo or copy skill folders by hand.
 
+Requires `skills` CLI **1.5.16 or newer** — earlier versions install the files but never link them into Claude Code. Use `npx skills@latest add ...` if you are unsure which version you have.
+
 ### Install for a Specific Agent
 
 Use `--agent` to target a specific AI coding agent. Initially, we'll support common client targets, expanding the list over time. For the full list of clients supported by the spec, see the [`skills` CLI Supported Agents table](https://github.com/vercel-labs/skills#supported-agents).
