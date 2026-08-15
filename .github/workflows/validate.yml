@@ -25,6 +25,14 @@ concurrency:
   group: validate-${{ github.ref }}
   cancel-in-progress: true
 
+# Versions are pinned so a new upstream release cannot turn a green run
+# red on its own. They match the pins in the repo-scaffold source repo.
+env:
+  SHELLCHECK_VERSION: 0.11.0.1
+  SHFMT_VERSION: 4.0.0
+  ACTIONLINT_VERSION: 1.7.12.24
+  ZIZMOR_VERSION: 1.29.0
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -45,6 +53,24 @@ jobs:
           fi
           yq --version
           jq --version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+
+      - name: Install lint tools
+        # Not for linting this repo — for the smoke tests below. A
+        # repo-scaffold smoke run scaffolds a throwaway repository and
+        # then executes that repository's own check-shell.sh and
+        # check-workflows.sh, and those treat a missing tool as a failure
+        # whenever CI is set. Without these installs the smoke test fails
+        # on the tooling, not on the skill.
+        run: |
+          set -euo pipefail
+          uv tool install "shellcheck-py==${SHELLCHECK_VERSION}"
+          uv tool install "shfmt-py==${SHFMT_VERSION}"
+          uv tool install "actionlint-py==${ACTIONLINT_VERSION}"
+          uv tool install "zizmor==${ZIZMOR_VERSION}"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Validate skill contract
         run: bash .github/scripts/validate-skills.sh
