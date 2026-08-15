@@ -1,0 +1,327 @@
+# SPDX-License-Identifier: MIT
+#
+# Mirror skills from their source repos into this catalog.
+#
+# The source of truth for a skill is its own repository; this catalog is
+# a distribution surface. Registrations live in components.d/<slug>.yml —
+# one file per source repo, so concurrent onboarding PRs never touch a
+# shared file.
+#
+# Flow:
+#   components.d/*.yml → sparse clone each source repo → rsync each
+#   declared skill into skills/<catalog_dir>/ → drop anything missing a
+#   required artifact → prune deregistered dirs → regenerate the catalog
+#   surfaces and the plugin tree → open one PR.
+#
+# The result lands as a pull request, never a direct push: a mirror that
+# rewrites main unattended has no review point when an upstream change
+# is wrong.
+#
+# Private source repos need a PAT with read access in the SKILLS_SYNC_PAT
+# secret. Public ones need nothing.
+
+name: Sync Skills from Source Repos
+
+on:
+  schedule:
+    # 06:17 UTC daily (15:17 KST). Off the hour on purpose — scheduled
+    # jobs at :00 queue behind everyone else's cron.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-skills
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout catalog
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Ensure yq and jq
+        run: |
+          set -euo pipefail
+          command -v jq >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq jq; }
+          if ! command -v yq >/dev/null; then
+            sudo curl -fsSL -o /usr/local/bin/yq \
+              https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          fi
+
+      - name: Mirror skills from source repos
+        id: mirror
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SYNC_PAT }}
+        run: |
+          set -euo pipefail
+          : > /tmp/mirrored-components.txt
+          : > /tmp/changed-components.txt
+          : > /tmp/failed-components.txt
+          : > /tmp/mirrored-skill-dirs.txt
+
+          shopt -s nullglob
+          component_files=(components.d/*.yml)
+          shopt -u nullglob
+          if [ ${#component_files[@]} -eq 0 ]; then
+            echo "::notice::No components.d registrations — nothing to mirror"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          # Aggregate into one document so the loop can index by position.
+          CONFIG=/tmp/components.aggregated.yml
+          yq ea '[.] | {"components": .}' components.d/*.yml > "$CONFIG"
+
+          # Authenticate through a credential helper so the token never
+          # appears in a clone URL or in error output. Public sources work
+          # without the secret.
+          if [ -n "${GH_TOKEN:-}" ]; then
+            git config --global credential.helper \
+              '!f() { echo "username=x-access-token"; echo "password=${GH_TOKEN}"; }; f'
+          fi
+
+          count=$(yq -r '.components | length' "$CONFIG")
+          for i in $(seq 0 $((count - 1))); do
+            name=$(yq -r ".components[$i].name" "$CONFIG")
+            repo=$(yq -r ".components[$i].repo" "$CONFIG")
+            ref=$(yq -r ".components[$i].ref // \"main\"" "$CONFIG")
+
+            echo "── $name ($repo@$ref)"
+
+            tmp_dir=".tmp/$(echo "$repo" | tr '/' '-')"
+            if ! git clone --depth 1 --filter=blob:none --sparse \
+                   "https://github.com/${repo}.git" "$tmp_dir" -b "$ref" 2>/dev/null; then
+              echo "  ⚠ clone failed — skipping"
+              echo "- **$name** ($repo): clone failed" >> /tmp/failed-components.txt
+              continue
+            fi
+
+            skill_count=$(yq -r ".components[$i].skills | length" "$CONFIG")
+            sparse_paths=""
+            for j in $(seq 0 $((skill_count - 1))); do
+              sparse_paths="$sparse_paths $(yq -r ".components[$i].skills[$j].path" "$CONFIG")"
+            done
+            (cd "$tmp_dir" && git sparse-checkout set $sparse_paths 2>/dev/null) || true
+
+            mirrored=false
+            for j in $(seq 0 $((skill_count - 1))); do
+              path=$(yq -r ".components[$i].skills[$j].path" "$CONFIG")
+              catalog_dir=$(yq -r ".components[$i].skills[$j].catalog_dir" "$CONFIG")
+              src="$tmp_dir/$path"
+
+              # An empty or missing source path is almost always a moved
+              # or renamed directory upstream. Preserve what the catalog
+              # already has rather than mirroring the emptiness.
+              if [ -d "$src" ] && [ -n "$(ls -A "$src" 2>/dev/null)" ]; then
+                mkdir -p "skills/$catalog_dir"
+                rsync -a --delete "$src/" "skills/$catalog_dir/"
+                mirrored=true
+                echo "skills/$catalog_dir" >> /tmp/mirrored-skill-dirs.txt
+                echo "  ✓ $path → skills/$catalog_dir/"
+              else
+                echo "  ⚠ $path empty or missing — keeping the existing catalog copy"
+                echo "- **$name** ($repo): \`$path\` empty or missing" >> /tmp/failed-components.txt
+              fi
+            done
+
+            if $mirrored; then
+              echo "- $name" >> /tmp/mirrored-components.txt
+              for j in $(seq 0 $((skill_count - 1))); do
+                catalog_dir=$(yq -r ".components[$i].skills[$j].catalog_dir" "$CONFIG")
+                if [ -n "$(git status --porcelain "skills/$catalog_dir" 2>/dev/null)" ]; then
+                  echo "- $name" >> /tmp/changed-components.txt
+                  break
+                fi
+              done
+            fi
+          done
+
+          rm -rf .tmp
+
+      - name: Fail if every source failed
+        if: steps.mirror.outputs.skip != 'true'
+        run: |
+          if [ ! -s /tmp/mirrored-components.txt ]; then
+            echo "::error::Every source checkout failed — nothing was mirrored"
+            exit 1
+          fi
+
+      - name: Enforce the skill contract
+        if: steps.mirror.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+
+          # A skill enters the catalog only with the artifacts an
+          # installing user needs to judge it:
+          #   SKILL.md       what the agent reads
+          #   skill-card.md  owner, license, known risks
+          #   eval task set  evidence about when it fires and when it does not
+          # Anything missing one is dropped here, before the PR exists,
+          # with the reason recorded in the PR body. Dropping beats
+          # publishing an unreviewable skill.
+          dropped=/tmp/dropped-skills.txt
+          : > "$dropped"
+
+          while IFS= read -r skill_md; do
+            dir=$(dirname "$skill_md")
+            missing=""
+            [ -f "$dir/skill-card.md" ] || missing="$missing skill-card.md"
+
+            has_eval=""
+            if [ -n "$(find "$dir" -type f -name evals.json -print -quit 2>/dev/null)" ]; then
+              has_eval=1
+            else
+              for sub in evals eval benchmark; do
+                if [ -d "$dir/$sub" ] && \
+                   [ -n "$(find "$dir/$sub" -maxdepth 1 -type f -name '*.json' -print -quit 2>/dev/null)" ]; then
+                  has_eval=1
+                  break
+                fi
+              done
+            fi
+            [ -n "$has_eval" ] || missing="$missing evals.json"
+
+            if [ -n "$missing" ]; then
+              echo "$dir|missing artifacts:$missing" >> "$dropped"
+              echo "  ✗ dropping $dir — missing:$missing"
+              rm -rf "$dir"
+            fi
+          done < <(find skills -mindepth 2 -maxdepth 2 -type f -name SKILL.md)
+
+          # A catalog dir left without a SKILL.md is a husk — helper files
+          # and nothing that an agent can load.
+          for d in skills/*/; do
+            d="${d%/}"
+            if [ ! -f "$d/SKILL.md" ]; then
+              echo "$d|orphan: no SKILL.md" >> "$dropped"
+              echo "  ✗ dropping $d — no SKILL.md"
+              rm -rf "$d"
+            fi
+          done
+
+          if [ -s "$dropped" ]; then
+            grep -qx -- "- contract enforcement" /tmp/changed-components.txt 2>/dev/null \
+              || echo "- contract enforcement" >> /tmp/changed-components.txt
+          fi
+
+      - name: Prune deregistered dirs
+        if: steps.mirror.outputs.skip != 'true'
+        run: |
+          bash .github/scripts/prune-orphans.sh
+          if [ -s /tmp/pruned-orphans.txt ]; then
+            echo "- orphan pruning" >> /tmp/changed-components.txt
+          fi
+
+      - name: Regenerate catalog surfaces
+        if: steps.mirror.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          bash .github/scripts/gen-catalog.sh
+          bash .github/scripts/build-plugins.sh
+          if [ -n "$(git status --porcelain README.md skills.sh.json plugins \
+                       .claude-plugin .cursor-plugin .agents 2>/dev/null)" ]; then
+            grep -qx -- "- catalog surfaces" /tmp/changed-components.txt 2>/dev/null \
+              || echo "- catalog surfaces" >> /tmp/changed-components.txt
+          fi
+
+      - name: Build summary
+        id: summary
+        if: steps.mirror.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+
+          if [ -s /tmp/failed-components.txt ]; then
+            echo "has_failures=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_failures=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # The steps after the mirror loop can revert or delete what it
+          # wrote, so trust the working tree over the list built earlier.
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Every source mirrored; no content changes"
+            exit 0
+          fi
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          sort -u -o /tmp/changed-components.txt /tmp/changed-components.txt
+          total=$(wc -l < /tmp/changed-components.txt | tr -d ' ')
+          names=$(sed 's/^- //' /tmp/changed-components.txt | paste -sd, -)
+
+          title="chore: sync skills ($names)"
+          # GitHub rejects a title over 256 characters on create as well as
+          # on update, which would strand the synced content on the branch.
+          if [ "${#title}" -gt 256 ]; then
+            title="chore: sync skills ($total component(s))"
+          fi
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+
+          {
+            echo 'body<<EOFBODY'
+            echo "## Automated skills sync"
+            echo
+            echo "**Updated:**"
+            cat /tmp/changed-components.txt
+            if [ -s /tmp/dropped-skills.txt ]; then
+              echo
+              echo "**Dropped — missing required artifacts:**"
+              while IFS='|' read -r dir reason; do
+                echo "- \`$dir\` — ${reason#*: }"
+              done < /tmp/dropped-skills.txt
+              echo
+              echo "Fix at the source: add the missing file, then the next sync restores the skill."
+            fi
+            if [ -s /tmp/pruned-orphans.txt ]; then
+              echo
+              echo "**Pruned — deregistered from components.d:**"
+              while read -r dir; do echo "- \`skills/$dir\`"; done < /tmp/pruned-orphans.txt
+            fi
+            if [ -s /tmp/pruned-orphans-overflow.txt ]; then
+              echo
+              echo "**⚠ Pruning skipped — over the safety cap, needs a human:**"
+              while read -r dir; do echo "- \`skills/$dir\`"; done < /tmp/pruned-orphans-overflow.txt
+            fi
+            if [ -s /tmp/failed-components.txt ]; then
+              echo
+              echo "**Sources that failed:**"
+              cat /tmp/failed-components.txt
+            fi
+            echo
+            echo "Triggered by \`${{ github.event_name }}\`."
+            echo 'EOFBODY'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open pull request
+        if: steps.mirror.outputs.skip != 'true' && steps.summary.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: ${{ steps.summary.outputs.title }}
+          branch: automated/sync-skills
+          title: ${{ steps.summary.outputs.title }}
+          body: ${{ steps.summary.outputs.body }}
+          delete-branch: true
+
+      - name: Report source failures
+        if: steps.mirror.outputs.skip != 'true' && steps.summary.outputs.has_failures == 'true'
+        run: |
+          # A source that fails every run is a stale registration — the
+          # path moved upstream, the branch was renamed, or the repo went
+          # private. Surface it in the run summary; the sync itself still
+          # succeeded for the other sources.
+          {
+            echo "### Sources that failed this run"
+            echo
+            cat /tmp/failed-components.txt
+            echo
+            echo "Usually a \`path\` in components.d/<slug>.yml no longer matches the source repo."
+          } >> "$GITHUB_STEP_SUMMARY"

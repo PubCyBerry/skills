@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT
+#
+# Catalog exceptions — skills/ directories allowed to exist WITHOUT a
+# components.d registration.
+#
+# Everything under skills/ is normally a mirror of a source repo declared
+# in components.d/<slug>.yml. Anything else is an orphan and the hourly
+# sync prunes it (see .github/scripts/prune-orphans.sh). List a directory
+# here only when it is deliberately authored inside this catalog and has
+# no upstream — for example catalog infrastructure, or a skill staged by
+# direct PR while its source repo is still private.
+#
+# Every entry needs a reason and an owner. An exception with neither is
+# indistinguishable from a directory someone forgot to deregister.
+
+exceptions: []
+# Example:
+# exceptions:
+#   - dir: catalog-router
+#     reason: Catalog infrastructure skill; maintained by direct PR (no upstream repo)
+#     owner: pubcyberry

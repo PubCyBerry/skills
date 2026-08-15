@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: MIT
+#
+# Defaults applied to every plugins.d/<name>.yml.
+#
+# - A field set in a per-plugin file WINS over the value here.
+# - The merge is deep, but a mapping you redeclare replaces the whole
+#   mapping (set both `name:` and `url:` if you override `author:`).
+#
+# Files whose name starts with `_` are includes, not plugins — the build
+# never emits a plugin for them.
+
+version: "0.1.0"
+
+author:
+  name: PubCyBerry
+  url: https://github.com/pubcyberry
+
+homepage: https://github.com/pubcyberry/skills
+repository: https://github.com/pubcyberry/skills
+license: MIT
+
+brand_color: "#3b82f6"
+
+capabilities:
+  - Interactive
+  - Write
+
+# How include_skills land under plugins/<name>/skills/:
+#   copy — real files, rsync-style. Required for a Codex local
+#          marketplace install, which silently drops symlinks.
+# Only `copy` is implemented; the field exists so a future symlink mode
+# is a config change rather than a rewrite.
+skill_files: copy

@@ -1,0 +1,20 @@
+{
+  "interface": {
+    "displayName": "PubCyBerry"
+  },
+  "name": "pubcyberry",
+  "plugins": [
+    {
+      "category": "Developer Tools",
+      "name": "pubcyberry-skills",
+      "policy": {
+        "authentication": "NONE",
+        "installation": "AVAILABLE"
+      },
+      "source": {
+        "path": "./plugins/pubcyberry-skills",
+        "source": "local"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "author": {
+    "name": "PubCyBerry"
+  },
+  "description": "Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.",
+  "homepage": "https://github.com/pubcyberry/skills",
+  "keywords": [
+    "agent-skills",
+    "scaffolding",
+    "documentation",
+    "agents-md",
+    "pre-commit",
+    "repository-setup",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "name": "pubcyberry-skills",
+  "repository": "https://github.com/pubcyberry/skills",
+  "version": "0.1.0"
+}

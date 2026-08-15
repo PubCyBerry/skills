@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT
+name: repo-scaffold
+repo: pubcyberry/repo-scaffold
+description: 저장소를 에이전트가 문서로 탐색할 수 있는 형태로 스캐폴딩하고 pre-commit 훅으로 고정한다.
+ref: main
+skills:
+  - path: skills/repo-scaffold/
+    catalog_dir: repo-scaffold
+links:
+  contributing: CONTRIBUTING.md
+  security: true

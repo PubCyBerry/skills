@@ -1,0 +1,40 @@
+{
+  "author": {
+    "name": "PubCyBerry",
+    "url": "https://github.com/pubcyberry"
+  },
+  "description": "Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.",
+  "homepage": "https://github.com/pubcyberry/skills",
+  "interface": {
+    "brandColor": "#3b82f6",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "category": "Developer Tools",
+    "defaultPrompt": [
+      "이 저장소를 에이전트가 탐색하기 좋게 스캐폴딩해줘.",
+      "Set up AGENTS.md and a docs index that stays current on every commit.",
+      "새 레포 만들었는데 뭐부터 해야 할까?"
+    ],
+    "developerName": "PubCyBerry",
+    "displayName": "PubCyBerry Skills",
+    "longDescription": "Agent skills for making a repository legible to coding agents: an auto-generated AGENTS.md doc index, a docs/ hierarchy with a front matter convention, and pre-commit hooks that keep both from rotting. Installing the plugin makes every skill in this catalog available to the agent.",
+    "shortDescription": "Repository tooling for coding agents",
+    "websiteURL": "https://github.com/pubcyberry/skills"
+  },
+  "keywords": [
+    "agent-skills",
+    "scaffolding",
+    "documentation",
+    "agents-md",
+    "pre-commit",
+    "repository-setup",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "name": "pubcyberry-skills",
+  "repository": "https://github.com/pubcyberry/skills",
+  "skills": "./skills/",
+  "version": "0.1.0"
+}

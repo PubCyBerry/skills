@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "description": "PubCyBerry agent skills — install the skills curated in this catalog repo.",
+    "version": "1.0.0"
+  },
+  "name": "pubcyberry",
+  "owner": {
+    "name": "PubCyBerry",
+    "url": "https://github.com/pubcyberry"
+  },
+  "plugins": [
+    {
+      "description": "Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.",
+      "name": "pubcyberry-skills",
+      "source": "./plugins/pubcyberry-skills"
+    }
+  ]
+}

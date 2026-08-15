@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT
+#
+# Marketplace-level metadata, shared by the three generated marketplace
+# manifests:
+#   .claude-plugin/marketplace.json   Claude Code
+#   .cursor-plugin/marketplace.json   Cursor
+#   .agents/plugins/marketplace.json  other spec-compliant agents
+#
+# Per-plugin fields live in plugins.d/<name>.yml, not here.
+
+name: pubcyberry
+display_name: PubCyBerry
+description: PubCyBerry agent skills — install the skills curated in this catalog repo.
+version: "1.0.0"
+
+owner:
+  name: PubCyBerry
+  url: https://github.com/pubcyberry

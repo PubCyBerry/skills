@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: MIT
+#
+# Catalog groups. A skill joins a group by declaring `metadata.group:
+# <key>` in its SKILL.md frontmatter; an unknown key is a hard error in
+# gen-catalog.sh rather than a silently ungrouped skill.
+#
+# Order here is the order groups appear in README.md and skills.sh.json.
+# Empty groups are not emitted (the skills.sh schema forbids them), so a
+# group can be declared before its first skill exists.
+#
+# Titles and descriptions are English on purpose: skills.sh.json feeds an
+# English-facing marketplace. Per-skill summaries stay in the skill's own
+# language.
+
+groups:
+  - key: repo-tooling
+    title: Repository Tooling
+    description: >-
+      Scaffold, document, and guard repositories so coding agents can
+      navigate them from committed docs instead of guessing.
+
+  - key: agent-authoring
+    title: Agent Authoring
+    description: >-
+      Build and evaluate the agent surface itself — skills, subagents,
+      prompts, and the checks that keep them honest.
+
+  - key: document-processing
+    title: Document Processing
+    description: >-
+      Read, transform, and produce documents and structured data files.
