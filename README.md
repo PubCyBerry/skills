@@ -108,6 +108,7 @@ For non-interactive installs, global installs, agent-specific installs, updates,
 | Skill | Group | Kind | Lang | Summary |
 |-------|-------|------|------|---------|
 | [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Repository Tooling | workflow | ko | 에이전트가 문서로 저장소를 탐색하게 만드는 구조를 세우고 커밋 훅으로 고정한다. |
+| [`subagent-creator`](skills/subagent-creator/SKILL.md) | Agent Authoring | workflow | ko | Claude Code subagent 정의 파일을 위임 트리거부터 시스템 프롬프트까지 설계해 쓰고 형식을 검증한다. |
 <!-- skills-table-end -->
 
 The table between the `skills-table` markers is **generated** from each skill's `SKILL.md` frontmatter by `.github/scripts/gen-catalog.sh`. Do not edit it by hand — CI fails the PR when it drifts from the skills it describes.
@@ -157,7 +158,8 @@ A skill is mirrored only when it ships all three of these. Anything missing one 
 ├── docs/
 │   └── advanced-install.md       # non-interactive, global, and manual installs
 ├── skills/                       # mirrored skills — edit at the source repo
-│   └── repo-scaffold/
+│   ├── repo-scaffold/
+│   └── subagent-creator/
 └── .github/
     ├── scripts/                  # gen-catalog.sh, build-plugins.sh,
     │                             # prune-orphans.sh, validate-skills.sh

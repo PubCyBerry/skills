@@ -8,6 +8,13 @@
       "skills": [
         "repo-scaffold"
       ]
+    },
+    {
+      "title": "Agent Authoring",
+      "description": "Build and evaluate the agent surface itself — skills, subagents, prompts, and the checks that keep them honest.",
+      "skills": [
+        "subagent-creator"
+      ]
     }
   ]
 }

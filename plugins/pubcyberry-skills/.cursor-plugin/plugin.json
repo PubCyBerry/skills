@@ -2,7 +2,7 @@
   "author": {
     "name": "PubCyBerry"
   },
-  "description": "Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.",
+  "description": "Make a repository legible to coding agents, and author the agents that work in it.",
   "homepage": "https://github.com/pubcyberry/skills",
   "keywords": [
     "agent-skills",
@@ -11,10 +11,13 @@
     "agents-md",
     "pre-commit",
     "repository-setup",
+    "subagent",
+    "claude-code",
+    "agent-authoring",
     "developer-tools"
   ],
   "license": "MIT",
   "name": "pubcyberry-skills",
   "repository": "https://github.com/pubcyberry/skills",
-  "version": "0.1.0"
+  "version": "0.2.0"
 }
