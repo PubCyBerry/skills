@@ -1,0 +1,73 @@
+{
+  "skill_name": "subagent-creator",
+  "evals": [
+    {
+      "id": "subagent-creator.explicit-positive.v1",
+      "prompt": "Use the subagent-creator skill to build a subagent that reviews database migrations before they are applied.",
+      "expected_skill": "subagent-creator",
+      "expected_output": "The agent loads the skill, pins down the single responsibility, delegation triggers and output contract, then writes .claude/agents/migration-reviewer.md with name/description/tools/model frontmatter and a system prompt, and runs validate_subagent.py on it.",
+      "assertions": [
+        "The subagent-creator skill is selected and its SKILL.md drives the answer.",
+        "The written file is .claude/agents/<name>.md and frontmatter name matches the filename stem.",
+        "The description states when the subagent should be delegated to, not only what it does.",
+        "tools is a minimal allowlist rather than every tool, or is deliberately omitted with the inheritance noted.",
+        "validate_subagent.py is run against the written file via uv run --with pyyaml."
+      ]
+    },
+    {
+      "id": "subagent-creator.implicit-positive.ko.v1",
+      "prompt": "커밋 전에 코드 리뷰해주는 에이전트 하나 만들어줘.",
+      "expected_skill": "subagent-creator",
+      "expected_output": "The agent recognizes this as a subagent definition request without the word 'subagent' being used, loads the skill, and produces a validated .claude/agents/code-reviewer.md.",
+      "assertions": [
+        "The skill is triggered from the implicit Korean phrasing without the user naming it.",
+        "A definition file is written rather than the review being performed inline.",
+        "The description carries a proactive trigger phrase so automatic delegation can fire."
+      ]
+    },
+    {
+      "id": "subagent-creator.implicit-positive.en.v1",
+      "prompt": "I want a test-writer that Claude hands off to whenever I add a new module, and it should only be able to read and write files, no shell.",
+      "expected_skill": "subagent-creator",
+      "expected_output": "The agent identifies the subagent request, sets tools to a read/write allowlist that excludes Bash, and writes plus validates the definition file.",
+      "assertions": [
+        "The skill is triggered from English phrasing that never says 'subagent'.",
+        "The tools allowlist honors the stated restriction and excludes Bash.",
+        "Every tool name written into the file exists in the validator's tool set (no invented tools)."
+      ]
+    },
+    {
+      "id": "subagent-creator.scope-positive.ko.v1",
+      "prompt": "아까 만든 에이전트를 모든 프로젝트에서 쓰고 싶은데, 전역으로 넣어줘.",
+      "expected_skill": "subagent-creator",
+      "expected_output": "The agent applies the scope rules from step 4: global means ~/.claude/agents/<name>.md, it checks for an existing file before overwriting, and it notes that a project definition wins over a global one of the same name.",
+      "assertions": [
+        "The global path ~/.claude/agents/<name>.md is used because the user asked for it explicitly.",
+        "An existing file at the destination is inspected before being overwritten.",
+        "The project-over-global precedence rule is stated."
+      ]
+    },
+    {
+      "id": "subagent-creator.negative.skill-authoring.v1",
+      "prompt": "PDF에서 표를 뽑아내는 스킬을 하나 만들어줘. SKILL.md랑 references까지 갖춰서.",
+      "expected_skill": null,
+      "expected_output": "The agent treats this as Agent Skill authoring (skill-creator territory) and produces a SKILL.md, not a .claude/agents/<name>.md subagent definition.",
+      "assertions": [
+        "subagent-creator is not activated.",
+        "No file is written under .claude/agents/.",
+        "If subagent-creator is mentioned at all, it is explicitly scoped out as a different artifact."
+      ]
+    },
+    {
+      "id": "subagent-creator.negative.one-off-delegation.v1",
+      "prompt": "이 저장소에서 deprecated API를 쓰는 곳을 서브에이전트로 병렬 탐색해서 목록 뽑아줘.",
+      "expected_skill": null,
+      "expected_output": "The agent delegates the search with the Agent tool for this one task and reports the findings; it does not create a persistent .claude/agents/<name>.md definition file.",
+      "assertions": [
+        "subagent-creator is not activated even though the word 서브에이전트 appears.",
+        "No definition file is created; the delegation is one-off and in-session.",
+        "The answer is the list of findings, not a subagent definition."
+      ]
+    }
+  ]
+}

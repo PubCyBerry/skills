@@ -3,10 +3,13 @@
 
 # PubCyBerry Skills
 
-Agent skills for making a repository legible to coding agents: an
-auto-generated AGENTS.md doc index, a docs/ hierarchy with a front matter
-convention, and pre-commit hooks that keep both from rotting. Installing the
-plugin makes every skill in this catalog available to the agent.
+Agent skills for the two halves of working with coding agents. Making a
+repository legible to them: an auto-generated AGENTS.md doc index, a docs/
+hierarchy with a front matter convention, and pre-commit hooks that keep both
+from rotting. And authoring the agents themselves: Claude Code subagent
+definitions whose delegation triggers, tool allowlists, and system prompts
+are written deliberately and validated before use. Installing the plugin
+makes every skill in this catalog available to the agent.
 
 ## Install
 
@@ -19,5 +22,6 @@ plugin makes every skill in this catalog available to the agent.
 ## Bundled skills
 
 - [`repo-scaffold`](skills/repo-scaffold/SKILL.md)
+- [`subagent-creator`](skills/subagent-creator/SKILL.md)
 
 Canonical copies live in [`skills/`](../../skills/) at the repository root.

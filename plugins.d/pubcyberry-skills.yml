@@ -1,17 +1,20 @@
 # SPDX-License-Identifier: MIT
 name: pubcyberry-skills
 
-version: "0.1.0"
-description: Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.
+version: "0.2.0"
+description: Make a repository legible to coding agents, and author the agents that work in it.
 
 display_name: PubCyBerry Skills
-short_description: Repository tooling for coding agents
+short_description: Repository tooling and agent authoring for coding agents
 long_description: >-
-  Agent skills for making a repository legible to coding agents: an
-  auto-generated AGENTS.md doc index, a docs/ hierarchy with a front
-  matter convention, and pre-commit hooks that keep both from rotting.
-  Installing the plugin makes every skill in this catalog available to
-  the agent.
+  Agent skills for the two halves of working with coding agents. Making a
+  repository legible to them: an auto-generated AGENTS.md doc index, a
+  docs/ hierarchy with a front matter convention, and pre-commit hooks
+  that keep both from rotting. And authoring the agents themselves:
+  Claude Code subagent definitions whose delegation triggers, tool
+  allowlists, and system prompts are written deliberately and validated
+  before use. Installing the plugin makes every skill in this catalog
+  available to the agent.
 
 category: Developer Tools
 
@@ -22,18 +25,23 @@ keywords:
   - agents-md
   - pre-commit
   - repository-setup
+  - subagent
+  - claude-code
+  - agent-authoring
   - developer-tools
 
 default_prompts:
   - "이 저장소를 에이전트가 탐색하기 좋게 스캐폴딩해줘."
   - "Set up AGENTS.md and a docs index that stays current on every commit."
   - "새 레포 만들었는데 뭐부터 해야 할까?"
+  - "커밋 전에 코드 리뷰해주는 서브에이전트 만들어줘."
 
 # Skills bundled into plugins/<name>/skills/. Paths are relative to the
 # repository root and point at the canonical catalog copy, so a synced
 # skill update flows into the plugin on the next build.
 include_skills:
   - skills/repo-scaffold/
+  - skills/subagent-creator/
 
 # Inherited from plugins.d/_defaults.yml:
 #   author, homepage, repository, license, brand_color, capabilities,
