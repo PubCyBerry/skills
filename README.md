@@ -107,7 +107,7 @@ For non-interactive installs, global installs, agent-specific installs, updates,
 <!-- skills-table-start -->
 | Skill | Group | Kind | Lang | Summary |
 |-------|-------|------|------|---------|
-| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Repository Tooling | workflow | ko | 에이전트가 문서로 저장소를 탐색하게 만드는 구조를 세우고 커밋 훅으로 고정한다. |
+| [`repo-scaffold`](skills/repo-scaffold/SKILL.md) | Repository Tooling | workflow | ko | 에이전트가 문서로 저장소를 탐색하게 만드는 구조를 세우고 훅과 CI 로 고정한다. |
 | [`subagent-creator`](skills/subagent-creator/SKILL.md) | Agent Authoring | workflow | ko | Claude Code subagent 정의 파일을 위임 트리거부터 시스템 프롬프트까지 설계해 쓰고 형식을 검증한다. |
 <!-- skills-table-end -->
 
