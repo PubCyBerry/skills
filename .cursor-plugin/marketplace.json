@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "description": "Make a repository legible to coding agents, and author the agents that work in it.",
+      "description": "Scaffold and document repositories so coding agents navigate them from committed docs instead of guessing.",
       "name": "pubcyberry-skills",
       "source": "./plugins/pubcyberry-skills"
     }
