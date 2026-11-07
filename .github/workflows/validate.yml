@@ -32,6 +32,12 @@ env:
   SHFMT_VERSION: 4.0.0
   ACTIONLINT_VERSION: 1.7.12.24
   ZIZMOR_VERSION: 1.29.0
+  RUMDL_VERSION: 0.2.55
+  VALE_VERSION: 3.13.0.0
+  CHECK_JSONSCHEMA_VERSION: 0.38.0
+  RUFF_VERSION: 0.16.3
+  MYPY_VERSION: 2.3.1
+  RUST_JUST_VERSION: 1.58.0
 
 jobs:
   validate:
@@ -64,16 +70,25 @@ jobs:
       - name: Install lint tools
         # Not for linting this repo — for the smoke tests below. A
         # repo-scaffold smoke run scaffolds a throwaway repository and
-        # then executes that repository's own check-shell.sh and
-        # check-workflows.sh, and those treat a missing tool as a failure
-        # whenever CI is set. Without these installs the smoke test fails
-        # on the tooling, not on the skill.
+        # then executes that repository's own check-*.sh scripts (shell,
+        # workflows, markdown, prose, docs metadata, python), and those
+        # treat a missing tool as a failure whenever CI is set. Without
+        # these installs the smoke test fails on the tooling, not on the
+        # skill. The list mirrors the repo-scaffold source repo's
+        # validate.yml; rust-just lets the smoke test parse the rendered
+        # Justfile instead of skipping it.
         run: |
           set -euo pipefail
           uv tool install "shellcheck-py==${SHELLCHECK_VERSION}"
           uv tool install "shfmt-py==${SHFMT_VERSION}"
           uv tool install "actionlint-py==${ACTIONLINT_VERSION}"
           uv tool install "zizmor==${ZIZMOR_VERSION}"
+          uv tool install "rumdl==${RUMDL_VERSION}"
+          uv tool install "vale==${VALE_VERSION}"
+          uv tool install "check-jsonschema==${CHECK_JSONSCHEMA_VERSION}"
+          uv tool install "ruff==${RUFF_VERSION}"
+          uv tool install "mypy==${MYPY_VERSION}"
+          uv tool install "rust-just==${RUST_JUST_VERSION}"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Validate skill contract
