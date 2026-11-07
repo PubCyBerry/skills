@@ -114,3 +114,15 @@ fix: correct the catalog_dir for <skill>
 chore: sync skills (<component>)
 docs: clarify the eval task set contract
 ```
+
+## 이슈와 PR 제목
+
+한국어로 쓰는 이슈 제목과 PR 제목은 개조식 명사형 어미로 끝낸다. `~함`, `~짐`, `~됨`, `~음` 이다.
+`~한다`, `~있다` 같은 문장 어미로 끝내지 않는다. PR 제목은 squash 커밋 제목으로 `main` 에 남는다.
+
+```
+fix: catalog_dir 끝의 슬래시를 거부함
+sync 워크플로가 저장소 무활동 60일 뒤 자동으로 꺼짐
+```
+
+영어 제목에는 이 규칙이 적용되지 않는다. PR 제목은 언어와 상관없이 위의 Conventional Commits 형식을 따른다.
