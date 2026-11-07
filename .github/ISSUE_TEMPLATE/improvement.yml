@@ -1,0 +1,39 @@
+# A gap rather than a failure: a missing check, hardening, or a change to
+# how the catalog is built or published.
+
+name: Catalog improvement
+description: Propose a missing check, hardening, or a change to how the catalog works
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What concrete limitation or risk exists today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired-outcome
+    attributes:
+      label: Desired outcome
+      description: The observable result, not only a preferred implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Files or workflows the change would touch.
+    validations:
+      required: true
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      placeholder: N/A if there are none.
+    validations:
+      required: false

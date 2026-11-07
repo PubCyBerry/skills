@@ -1,0 +1,55 @@
+# Register or deregister a source repository in components.d/. The
+# checklist mirrors what the sync enforces, so an incomplete skill is
+# caught here instead of being dropped silently by the next sync.
+
+name: Skill onboarding or removal
+description: Add a skill to the catalog, or take one out
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: request
+    attributes:
+      label: Request
+      options:
+        - Register a skill
+        - Deregister a skill
+    validations:
+      required: true
+
+  - type: input
+    id: source-repo
+    attributes:
+      label: Source repository
+      placeholder: owner/repo
+    validations:
+      required: true
+
+  - type: textarea
+    id: skills
+    attributes:
+      label: Skills
+      description: One line per skill. `path` is the directory holding SKILL.md in the source repo; `catalog_dir` is its directory name under skills/ here, without a trailing slash.
+      placeholder: |
+        path: skills/my-skill/    catalog_dir: my-skill
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: artifacts
+    attributes:
+      label: Required artifacts (registration only)
+      description: The sync drops a skill that is missing any of these.
+      options:
+        - label: SKILL.md with name, description, license, and metadata.kind/language/group/summary
+        - label: skill-card.md
+        - label: evals/evals.json with at least one negative case (expected_skill null)
+        - label: metadata.group exists in .github/scripts/skill-groups.yml
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: For a removal, say whether the source repository and installed copies are also going away.
+    validations:
+      required: false
