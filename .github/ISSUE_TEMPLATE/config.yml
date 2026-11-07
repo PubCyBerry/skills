@@ -1,0 +1,15 @@
+# Issue forms are the only way in. A blank issue skips the questions a
+# catalog report needs (which area, which skill, how to reproduce).
+#
+# Skill content is edited in each skill's source repository, and a fix
+# made here is overwritten by the next sync, so skill problems are routed
+# there instead of being filed against this catalog.
+
+blank_issues_enabled: false
+contact_links:
+  - name: Problem with a skill's own content
+    url: https://github.com/PubCyBerry/skills/tree/main/components.d
+    about: >-
+      Wrong instructions, a broken script, or a bad trigger inside a skill
+      belong to its source repository. Find the repo in components.d/ and
+      open the issue there.

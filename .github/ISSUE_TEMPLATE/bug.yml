@@ -1,0 +1,77 @@
+# Catalog bug report: the sync, the validation gate, the generated
+# surfaces, or an install channel misbehaving. Labels must already exist
+# in the repository; GitHub silently drops unknown ones.
+
+name: Catalog bug
+description: Something in the catalog machinery or an install channel is broken
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for the catalog itself. A problem inside a skill (its instructions, scripts, or triggers) belongs to the skill's source repository listed in `components.d/`.
+        Do not post secrets or an undisclosed vulnerability here.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Sync workflow (sync-skills.yml)
+        - Validate workflow (validate.yml)
+        - Catalog scripts (.github/scripts)
+        - Generated surfaces (README table, skills.sh.json, plugins/, marketplace.json)
+        - Install channel (npx skills, plugin, pi, skills.sh)
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Smallest reliable steps, input, or workflow run link.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Commit, runner or OS, and tool versions (yq, jq, skills CLI, agent).
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs or file:line references. Remove secrets first.
+    validations:
+      required: false

@@ -173,6 +173,8 @@ A skill is mirrored only when it ships all three of these. Anything missing one 
 ├── skills/                       # mirrored skills — edit at the source repo
 │   └── repo-scaffold/
 └── .github/
+    ├── ISSUE_TEMPLATE/           # bug, improvement, onboarding forms
+    ├── pull_request_template.md
     ├── scripts/                  # gen-catalog.sh, build-plugins.sh,
     │                             # prune-orphans.sh, validate-skills.sh
     └── workflows/                # validate.yml, sync-skills.yml
