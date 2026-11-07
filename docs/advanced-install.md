@@ -12,7 +12,7 @@ Use this guide when you need more control than the [root README quickstart](../R
 - Node.js and npm on your `PATH`. The examples use `npx`, which ships with npm.
 - A current `skills` CLI — **version 1.5.16 or newer**. `npx skills@latest` always resolves to the latest. Versions 1.5.15 and earlier do not create the Claude Code skills link, so installed skills never appear in Claude Code. Codex and other agents that read `.agents/skills/` directly are unaffected, which is why this failure looks agent-specific.
 - Access to `https://github.com/PubCyBerry/skills`.
-- An agent that supports Agent Skills — Claude Code, Codex, Antigravity, Cursor, Kiro, OpenCode, Windsurf, Gemini CLI, or another compatible client.
+- An agent that supports Agent Skills — Claude Code, Codex, Antigravity, Cursor, Kiro, Pi, OpenCode, Windsurf, Gemini CLI, or another compatible client.
 
 ## List skills before installing
 
@@ -46,6 +46,7 @@ npx skills add pubcyberry/skills --skill repo-scaffold --agent codex
 npx skills add pubcyberry/skills --skill repo-scaffold --agent antigravity
 npx skills add pubcyberry/skills --skill repo-scaffold --agent cursor
 npx skills add pubcyberry/skills --skill repo-scaffold --agent kiro-cli
+npx skills add pubcyberry/skills --skill repo-scaffold --agent pi
 ```
 
 `--agent` can be passed more than once:
@@ -135,6 +136,7 @@ Common global locations:
 | Claude Code | `~/.claude/skills/` |
 | Codex | `~/.codex/skills/` |
 | Cursor | `~/.cursor/skills/` |
+| Pi | `~/.agents/skills/` or `~/.pi/agent/skills/` |
 
 ```bash
 git clone https://github.com/PubCyBerry/skills.git
@@ -167,6 +169,7 @@ After installing `<skill-name>`, confirm it landed where your agent looks:
 |-------|-------|
 | Claude Code | `.claude/skills/<skill-name>/SKILL.md` resolves (project) or `~/.claude/skills/<skill-name>/SKILL.md` (global); the skill also shows up in `/skills`. |
 | Codex | `.agents/skills/<skill-name>/SKILL.md` resolves — Codex reads `.agents/skills/` directly, so no per-agent link is needed. |
+| Pi | `.agents/skills/<skill-name>/SKILL.md` resolves (project) or `~/.agents/skills/<skill-name>/SKILL.md` (global); the skill is listed in Pi's startup diagnostics and runs with `/skill:<skill-name>`. Project skills load only after you grant project trust. |
 
 If `.claude/skills/<skill-name>` is missing or empty on Claude Code, it is almost always the stale-CLI issue above: upgrade to 1.5.16+ and re-run the install.
 
