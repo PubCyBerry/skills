@@ -1,7 +1,9 @@
 <!-- skills/ is a mirror and is overwritten on the next sync. Change a skill's
      content in its source repository (see components.d/), not here.
      README's skills table, skills.sh.json, plugins/ and the marketplace.json
-     files are generated. Regenerate them instead of editing by hand. -->
+     files are generated. Regenerate them instead of editing by hand.
+     A title written in Korean ends with a nominal ending: ~함, ~짐, ~됨, ~음.
+     See CONTRIBUTING.md. -->
 
 ## Summary
 
