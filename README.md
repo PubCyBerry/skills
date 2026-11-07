@@ -50,6 +50,12 @@ npx skills add pubcyberry/skills --skill repo-scaffold --agent cursor
 npx skills add pubcyberry/skills --skill repo-scaffold --agent kiro-cli
 ```
 
+**Pi**
+
+```bash
+npx skills add pubcyberry/skills --skill repo-scaffold --agent pi
+```
+
 Use `--agent` more than once to install the same skill into multiple agents.
 
 ```bash
@@ -94,6 +100,14 @@ Every skill in this catalog is also packaged as a plugin, which installs them to
 ```bash
 codex plugin marketplace add pubcyberry/skills
 codex plugin add pubcyberry-skills
+```
+
+**Pi**
+
+Pi has no plugin marketplace. It installs this repository as a [Pi package](https://pi.dev/packages) and loads every skill under `skills/`.
+
+```bash
+pi install git:github.com/pubcyberry/skills
 ```
 
 The plugin tree under [`plugins/`](plugins/) is generated from `plugins.d/`; the skills inside it are copies of the canonical ones under `skills/`.
