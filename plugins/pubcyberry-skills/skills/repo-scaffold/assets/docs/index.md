@@ -17,13 +17,14 @@ related:
 
 ## Purpose
 
-The entry point for every document in this repository. Pick a target here instead of opening documents to find out what they contain.
+The entry point for every document in this repository. Pick a target here instead of opening
+documents to find out what they contain.
 
 ## Scope
 
-Everything under [docs/](docs/index.md).
+Everything under [docs/](index.md).
 
-Every document under [docs/](docs/index.md) is written in English. The rule is in [Writing Style](docs/standards/writing-style.md).
+Every document under [docs/](index.md) is written in English. The rule is in [Writing Style](standards/writing-style.md).
 
 ## Reading order
 
@@ -36,12 +37,15 @@ Every document under [docs/](docs/index.md) is written in English. The rule is i
 
 | Directory | Nature | When to open |
 | --- | --- | --- |
-| [standards/](docs/standards/index.md) | Rules that must be followed | Before writing code or documents |
-| [guides/](docs/guides/index.md) | How a task is carried out | When following a procedure |
-| [references/](docs/references/index.md) | External and supporting facts | When looking a fact up |
-| [generated/](docs/generated/index.md) | Produced from code or a schema | When checking the current implementation state |
+| [standards/](standards/index.md) | Rules that must be followed | Before writing code or documents |
+| [guides/](guides/index.md) | How a task is carried out | When following a procedure |
+| [references/](references/index.md) | External and supporting facts | When looking a fact up |
+| [generated/](generated/index.md) | Produced from code or a schema | When checking the current implementation state |
+| [architecture/](architecture/index.md) | System shape, and the decisions behind it | Before moving a boundary between components |
 
-Material tied to one product or framework goes into its own domain directory under `docs`. The same four categories apply inside it.
+Material tied to one product or framework goes into its own domain directory under `docs`.
+The first four categories apply inside it. Architecture stays at the top level, because a
+boundary between two products belongs to neither of them.
 
 ### Repository root files
 
@@ -49,14 +53,15 @@ These carry no front matter. Notation rules still apply.
 
 | Subject | File |
 | --- | --- |
-| Repository overview, getting started | [README.md](README.md) |
-| Agent working rules | [AGENTS.md](AGENTS.md) ([CLAUDE.md](CLAUDE.md) is a pointer) |
-| Credentials, secrets, sensitive data | [SECURITY.md](SECURITY.md) |
-| Environment variable keys | [.env.example](.env.example) |
-| Document verification | [tests/check-docs.sh](tests/check-docs.sh) |
+| Repository overview, getting started | [README.md](../README.md) |
+| Agent working rules | [AGENTS.md](../AGENTS.md) ([CLAUDE.md](../CLAUDE.md) is a pointer) |
+| Credentials, secrets, sensitive data | [SECURITY.md](../SECURITY.md) |
+| Environment variable keys | [.env.example](../.env.example) |
+| Document rules that join front matter to body, path, and file system | [tests/check-docs.sh](../tests/check-docs.sh) |
+| Front matter contract and lifecycle | [tests/check-docs-metadata.sh](../tests/check-docs-metadata.sh) |
 
 ## Related documents
 
-- [Documentation](docs/standards/documentation.md)
-- [Writing Style](docs/standards/writing-style.md)
-- [Security](SECURITY.md)
+- [Documentation](standards/documentation.md)
+- [Writing Style](standards/writing-style.md)
+- [Security](../SECURITY.md)
